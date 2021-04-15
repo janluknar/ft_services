@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: influxdb-service
+    labels:
+        app: influxdb-jluknar
+spec:
+    selector:
+        app: influxdb-jluknar
+    type: ClusterIP
+    ports:
+        - port: 8086
+          name: influxdb-port
+          targetPort: 8086
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: influxdb-pv
+    labels:
+        type: local
+spec:
+    storageClassName: influxdb-db
+    accessModes:
+        - ReadWriteOnce
+    capacity:
+        storage: 1Gi
+    hostPath:
+        path: /var/lib/influxdb/
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: influxdb-pv-claim
+spec:
+    storageClassName: influxdb-db
+    accessModes:
+        - ReadWriteOnce
+    resources:
+        requests:
+            storage: 1Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: influxdb-deployment
+    labels:
+        app: influxdb-jluknar
+spec:
+    selector:
+        matchLabels:
+            app: influxdb-jluknar
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: influxdb-jluknar
+        spec:
+            containers:
+                - name: influxdb-container
+                  image: influxdb
+                  imagePullPolicy: Never
+                  ports:
+                      - containerPort: 8086
+                        name: influxdb-port
+                  volumeMounts:
+                      - name: influxdb-pv
+                        mountPath: /var/lib/influxdb/
+            volumes:
+                - name: influxdb-pv
+                  persistentVolumeClaim:
+                      claimName: influxdb-pv-claim

@@ -1,0 +1,43 @@
+  
+apiVersion: v1
+kind: Service
+metadata:
+        name: phpmyadmin-service
+        labels:
+                app: phpmyadmin-jluknar
+spec:
+        selector:
+                app: phpmyadmin-jluknar
+        type: LoadBalancer
+        ports:
+                - port: 5000
+                  name: phpmyadmin-port
+                  targetPort: 5000
+                  nodePort: 5000
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        name: phpmyadmin-deployment
+        labels:
+                app: phpmyadmin-jluknar
+spec:
+        selector:
+                matchLabels:
+                        app: phpmyadmin-jluknar
+        replicas: 1
+        template:
+                metadata:
+                        name: phpmyadmin-pod
+                        labels:
+                                app: phpmyadmin-jluknar
+                spec:
+                        containers:
+                                - name: phpmyadmin-container
+                                  image: phpmyadmin
+                                  imagePullPolicy: Never
+                                  ports:
+                                          - containerPort: 5000
+                                            name: phpmyadmin-port

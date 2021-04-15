@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        name: telegraf-deployment
+        labels:
+                app: telegraf-jluknar
+spec:
+        selector:
+                matchLabels:
+                        app: telegraf-jluknar
+        replicas: 1
+        template:
+                metadata:
+                        name: telegraf-pod
+                        labels:
+                                app: telegraf-jluknar
+                spec:
+                        containers:
+                                - name: telegraf-container
+                                  image: telegraf
+                                  imagePullPolicy: Never
+                                  volumeMounts:
+                                          - name: docker-sock
+                                            mountPath: /var/run/docker.sock
+                        volumes:
+                                - name: docker-sock
+                                  hostPath:
+                                          path: /var/run/docker.sock

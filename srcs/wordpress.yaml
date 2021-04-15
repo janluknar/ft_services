@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+        name: wordpress-service
+        labels:
+                app: wordpress-jluknar
+spec:
+        selector:
+                app: wordpress-jluknar
+        type: LoadBalancer
+        ports:
+                - port: 5050
+                  name: wordpress-port
+                  targetPort: 5050
+                  nodePort: 5050
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        name: wordpress-deployment
+        labels:
+                app: wordpress-jluknar
+spec:
+        selector:
+                matchLabels:
+                        app: wordpress-jluknar
+        replicas: 1
+        template:
+                metadata:
+                        name: wordpress-pod
+                        labels:
+                                app: wordpress-jluknar
+                spec:
+                        containers:
+                                - name: wordpress-container
+                                  image: wordpress
+                                  imagePullPolicy: Never
+                                  ports:
+                                          - containerPort: 5050
+                                            name: wordpress-port
